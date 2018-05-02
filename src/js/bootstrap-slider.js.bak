@@ -352,13 +352,6 @@ const windowIsDefined = (typeof window === "object");
 				over: false
 			};
 
-			this.limitForward = function(nvaltud, bypass) {
-				if(bypass && (nvaltud > this.options.forwardValue)) {//$
-					return this.options.forwardValue;
-				} else {
-					return nvaltud;
-				}
-			}
 			// The objects used to store the reference to the tick methods if ticks_tooltip is on
 			this.ticksCallbackMap = {};
 			this.handleCallbackMap = {};
@@ -886,9 +879,7 @@ const windowIsDefined = (typeof window === "object");
 				focus: false,
 				tooltip_position: null,
 				labelledby: null,
-				rangeHighlights: [],
-				forwardValue: 10,
-				forwardEnabled: true
+				rangeHighlights: []
 			},
 
 			getElement: function() {
@@ -904,16 +895,10 @@ const windowIsDefined = (typeof window === "object");
 				}
 			},
 
-			setValue: function(val, triggerSlideEvent, triggerChangeEvent, bypass) {
+			setValue: function(val, triggerSlideEvent, triggerChangeEvent) {
 				if (!val) {
 					val = 0;
 				}
-				if(this.options.forwardEnabled) {//$
-					if(!bypass) {
-						val = this.limitForward(val);//$
-					}
-				}
-				
 				var oldValue = this.getValue();
 				this._state.value = this._validateInputValue(val);
 				var applyPrecision = this._applyPrecision.bind(this);
@@ -1368,37 +1353,21 @@ const windowIsDefined = (typeof window === "object");
 					} else {
 						this.trackLow.style.left = '0';
 					}
-					
-					var auk = false;
-					/*var aak = Math.min(positionPercentages[0], positionPercentages[1]);//$
-					if(Number(this.trackLow.style.width.split("%")[0]) < aak) {
-						this.trackLow.style.width = Math.min(positionPercentages[0], positionPercentages[1]) + '%';
-					}*/
+					this.trackLow.style.width = Math.min(positionPercentages[0], positionPercentages[1]) +'%';
 
 					if(this.stylePos==='right') {
 						this.trackSelection.style.right = Math.min(positionPercentages[0], positionPercentages[1]) + '%';
 					} else {
 						this.trackSelection.style.left = Math.min(positionPercentages[0], positionPercentages[1]) + '%';
 					}
-					
-					var aakq = Math.abs(positionPercentages[0], positionPercentages[1]);//$
-					if(Number(this.trackSelection.style.width.split("%")[0]) < aakq) {
-						auk = true;
-						this.trackSelection.style.width = Math.abs(positionPercentages[0] - positionPercentages[1]) + '%';
-					}
-					
+					this.trackSelection.style.width = Math.abs(positionPercentages[0] - positionPercentages[1]) +'%';
 
 					if(this.stylePos==='right') {
 						this.trackHigh.style.left = '0';
 					} else {
 						this.trackHigh.style.right = '0';
 					}
-					
-					if(auk) {
-						this.trackHigh.style.width = 100 - Math.min(positionPercentages[0], positionPercentages[1]) - Math.abs(positionPercentages[0] - positionPercentages[1]) + '%';
-					}
-					
-					
+					this.trackHigh.style.width = (100 - Math.min(positionPercentages[0], positionPercentages[1]) - Math.abs(positionPercentages[0] - positionPercentages[1])) +'%';
 
 					var offset_min = this.tooltip_min.getBoundingClientRect();
 					var offset_max = this.tooltip_max.getBoundingClientRect();
@@ -1482,14 +1451,6 @@ const windowIsDefined = (typeof window === "object");
 				}
 
 				this._state.percentage[this._state.dragged] = percentage;
-				
-				if(this.options.forwardEnabled) {//$
-					if(this._calculateValue() > this.options.forwardValue) {//$
-						return false;
-					}
-				}
-				
-				
 				this._layout();
 
 				if (this.touchCapable) {
@@ -1581,14 +1542,7 @@ const windowIsDefined = (typeof window === "object");
 				}
 
 				var val = this._state.value[handleIdx] + dir * this.options.step;
-				if(this.options.forwardEnabled) {//$
-					val = this.limitForward(val);//$
-					if(val > this.options.forwardValue) {//$
-						return false;
-					}
-				}
-				
-				const percentage = val / this.options.max * 100;
+				const percentage = (val / this.options.max) * 100;
 				this._state.keyCtrl = handleIdx;
 				if (this.options.range) {
 					this._adjustPercentageForRangeSliders(percentage);
@@ -1628,13 +1582,6 @@ const windowIsDefined = (typeof window === "object");
 				var percentage = this._getPercentage(ev);
 				this._adjustPercentageForRangeSliders(percentage);
 				this._state.percentage[this._state.dragged] = percentage;
-				if(this.options.forwardEnabled) {//$
-					if(this._calculateValue() > this.options.forwardValue) {//$
-						return false;
-					}
-				}
-				
-				
 				this._layout();
 
 				var val = this._calculateValue(true);
@@ -1646,12 +1593,6 @@ const windowIsDefined = (typeof window === "object");
 				if (ev.changedTouches === undefined) {
 					return;
 				}
-				if(this.options.forwardEnabled) {//$
-					if(this._calculateValue() > this.options.forwardValue) {//$
-						return false;
-					}
-				}
-				
 
 				var touch = ev.changedTouches[0];
 
@@ -1711,13 +1652,6 @@ const windowIsDefined = (typeof window === "object");
 					this._hideTooltip();
 				}
 				var val = this._calculateValue(true);
-				if(this.options.forwardEnabled) {//$
-					if(val > this.options.forwardValue) {//$
-						return false;
-					}
-				}
-				
-				
 
 				this._layout();
 				this._setDataVal(val);
@@ -1814,18 +1748,10 @@ const windowIsDefined = (typeof window === "object");
 					if (typeof input !== 'number') { throw new Error( ErrorMsgs.formatInvalidInputErrorMsg(input) ); }
 				}
 			},
-			_setDataVal: function(val, bypass) {//$
-				if(!this.options.forwardEnabled) {//$
-					this.element.setAttribute('data-value', val);
-					this.element.setAttribute('value', val);
-					this.element.value = val;
-				} else {
-					if(bypass) {
-						this.element.setAttribute('data-value', val);
-						this.element.setAttribute('value', val);
-						this.element.value = val;
-					}
-				}
+			_setDataVal: function(val) {
+				this.element.setAttribute('data-value', val);
+				this.element.setAttribute('value', val);
+				this.element.value = val;
 			},
 			_trigger: function(evt, val) {
 				val = (val || val === 0) ? val : undefined;
