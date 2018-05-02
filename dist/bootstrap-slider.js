@@ -213,8 +213,10 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 	})($);
 
 	/*************************************************
- 			BOOTSTRAP-SLIDER SOURCE CODE
- 	**************************************************/
+ 
+ 		BOOTSTRAP-SLIDER SOURCE CODE
+ 
+ **************************************************/
 
 	(function ($) {
 
@@ -324,8 +326,8 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 		};
 
 		/*************************************************
-  						CONSTRUCTOR
-  	**************************************************/
+  							CONSTRUCTOR
+  		**************************************************/
 		Slider = function Slider(element, options) {
 			createNewSlider.call(this, element, options);
 			return this;
@@ -347,6 +349,14 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 				over: false
 			};
 
+			this.limitForward = function (nvaltud, bypass) {
+				if (bypass && nvaltud > this.options.forwardValue) {
+					//$
+					return this.options.forwardValue;
+				} else {
+					return nvaltud;
+				}
+			};
 			// The objects used to store the reference to the tick methods if ticks_tooltip is on
 			this.ticksCallbackMap = {};
 			this.handleCallbackMap = {};
@@ -358,8 +368,8 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 			}
 
 			/*************************************************
-   					Process Options
-   	**************************************************/
+   						Process Options
+   		**************************************************/
 			options = options ? options : {};
 			var optionTypes = Object.keys(this.defaultOptions);
 
@@ -414,8 +424,8 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 			}
 
 			/*************************************************
-   					Create Markup
-   	**************************************************/
+   						Create Markup
+   		**************************************************/
 
 			var origWidth = this.element.style.width;
 			var updateSlider = false;
@@ -586,8 +596,8 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 			}
 
 			/*************************************************
-   						Setup
-   	**************************************************/
+   							Setup
+   		**************************************************/
 			this.eventToCallbackMap = {};
 			this.sliderElem.id = this.options.id;
 
@@ -725,8 +735,8 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 			this.setValue(this._state.value);
 
 			/******************************************
-   				Bind Event Listeners
-   	******************************************/
+   					Bind Event Listeners
+   		******************************************/
 
 			// Bind keyboard handlers
 			this.handle1Keydown = this._keydown.bind(this, 0);
@@ -810,10 +820,10 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 		}
 
 		/*************************************************
-  				INSTANCE PROPERTIES/METHODS
-  	- Any methods bound to the prototype are considered
+  					INSTANCE PROPERTIES/METHODS
+  		- Any methods bound to the prototype are considered
   part of the plugin's `public` interface
-  	**************************************************/
+  		**************************************************/
 		Slider.prototype = {
 			_init: function _init() {}, // NOTE: Must exist to support bridget
 
@@ -852,7 +862,9 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 				focus: false,
 				tooltip_position: null,
 				labelledby: null,
-				rangeHighlights: []
+				rangeHighlights: [],
+				forwardValue: 10,
+				forwardEnabled: true
 			},
 
 			getElement: function getElement() {
@@ -867,10 +879,17 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 				}
 			},
 
-			setValue: function setValue(val, triggerSlideEvent, triggerChangeEvent) {
+			setValue: function setValue(val, triggerSlideEvent, triggerChangeEvent, bypass) {
 				if (!val) {
 					val = 0;
 				}
+				if (this.options.forwardEnabled) {
+					//$
+					if (!bypass) {
+						val = this.limitForward(val); //$
+					}
+				}
+
 				var oldValue = this.getValue();
 				this._state.value = this._validateInputValue(val);
 				var applyPrecision = this._applyPrecision.bind(this);
@@ -1014,11 +1033,11 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 			},
 
 			/******************************+
-   				HELPERS
-   	- Any method that is not part of the public interface.
+   					HELPERS
+   		- Any method that is not part of the public interface.
    - Place it underneath this comment block and write its signature like so:
-   		_fnName : function() {...}
-   	********************************/
+   			_fnName : function() {...}
+   		********************************/
 			_removeSliderEventHandlers: function _removeSliderEventHandlers() {
 				// Remove keydown event listeners
 				this.handle1.removeEventListener("keydown", this.handle1Keydown, false);
@@ -1313,21 +1332,34 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 					} else {
 						this.trackLow.style.left = '0';
 					}
-					this.trackLow.style.width = Math.min(positionPercentages[0], positionPercentages[1]) + '%';
+
+					var auk = false;
+					/*var aak = Math.min(positionPercentages[0], positionPercentages[1]);//$
+     if(Number(this.trackLow.style.width.split("%")[0]) < aak) {
+     	this.trackLow.style.width = Math.min(positionPercentages[0], positionPercentages[1]) + '%';
+     }*/
 
 					if (this.stylePos === 'right') {
 						this.trackSelection.style.right = Math.min(positionPercentages[0], positionPercentages[1]) + '%';
 					} else {
 						this.trackSelection.style.left = Math.min(positionPercentages[0], positionPercentages[1]) + '%';
 					}
-					this.trackSelection.style.width = Math.abs(positionPercentages[0] - positionPercentages[1]) + '%';
+
+					var aakq = Math.abs(positionPercentages[0], positionPercentages[1]); //$
+					if (Number(this.trackSelection.style.width.split("%")[0]) < aakq) {
+						auk = true;
+						this.trackSelection.style.width = Math.abs(positionPercentages[0] - positionPercentages[1]) + '%';
+					}
 
 					if (this.stylePos === 'right') {
 						this.trackHigh.style.left = '0';
 					} else {
 						this.trackHigh.style.right = '0';
 					}
-					this.trackHigh.style.width = 100 - Math.min(positionPercentages[0], positionPercentages[1]) - Math.abs(positionPercentages[0] - positionPercentages[1]) + '%';
+
+					if (auk) {
+						this.trackHigh.style.width = 100 - Math.min(positionPercentages[0], positionPercentages[1]) - Math.abs(positionPercentages[0] - positionPercentages[1]) + '%';
+					}
 
 					var offset_min = this.tooltip_min.getBoundingClientRect();
 					var offset_max = this.tooltip_max.getBoundingClientRect();
@@ -1410,6 +1442,15 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 				}
 
 				this._state.percentage[this._state.dragged] = percentage;
+
+				if (this.options.forwardEnabled) {
+					//$
+					if (this._calculateValue() > this.options.forwardValue) {
+						//$
+						return false;
+					}
+				}
+
 				this._layout();
 
 				if (this.touchCapable) {
@@ -1503,6 +1544,15 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 				}
 
 				var val = this._state.value[handleIdx] + dir * this.options.step;
+				if (this.options.forwardEnabled) {
+					//$
+					val = this.limitForward(val); //$
+					if (val > this.options.forwardValue) {
+						//$
+						return false;
+					}
+				}
+
 				var percentage = val / this.options.max * 100;
 				this._state.keyCtrl = handleIdx;
 				if (this.options.range) {
@@ -1543,6 +1593,14 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 				var percentage = this._getPercentage(ev);
 				this._adjustPercentageForRangeSliders(percentage);
 				this._state.percentage[this._state.dragged] = percentage;
+				if (this.options.forwardEnabled) {
+					//$
+					if (this._calculateValue() > this.options.forwardValue) {
+						//$
+						return false;
+					}
+				}
+
 				this._layout();
 
 				var val = this._calculateValue(true);
@@ -1553,6 +1611,13 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 			_touchmove: function _touchmove(ev) {
 				if (ev.changedTouches === undefined) {
 					return;
+				}
+				if (this.options.forwardEnabled) {
+					//$
+					if (this._calculateValue() > this.options.forwardValue) {
+						//$
+						return false;
+					}
 				}
 
 				var touch = ev.changedTouches[0];
@@ -1611,6 +1676,13 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 					this._hideTooltip();
 				}
 				var val = this._calculateValue(true);
+				if (this.options.forwardEnabled) {
+					//$
+					if (val > this.options.forwardValue) {
+						//$
+						return false;
+					}
+				}
 
 				this._layout();
 				this._setDataVal(val);
@@ -1711,10 +1783,20 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 					}
 				}
 			},
-			_setDataVal: function _setDataVal(val) {
-				this.element.setAttribute('data-value', val);
-				this.element.setAttribute('value', val);
-				this.element.value = val;
+			_setDataVal: function _setDataVal(val, bypass) {
+				//$
+				if (!this.options.forwardEnabled) {
+					//$
+					this.element.setAttribute('data-value', val);
+					this.element.setAttribute('value', val);
+					this.element.value = val;
+				} else {
+					if (bypass) {
+						this.element.setAttribute('data-value', val);
+						this.element.setAttribute('value', val);
+						this.element.value = val;
+					}
+				}
 			},
 			_trigger: function _trigger(evt, val) {
 				val = val || val === 0 ? val : undefined;
@@ -1851,8 +1933,8 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 		};
 
 		/*********************************
-  		Attach to global namespace
-  	*********************************/
+  			Attach to global namespace
+  		*********************************/
 		if ($ && $.fn) {
 			var autoRegisterNamespace = void 0;
 
